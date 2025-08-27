@@ -1,0 +1,39 @@
+{
+    "experiment_name": "muon_optimizer_test",
+    "data": {
+        "vocab_file": "data/owt_train-vocab_size_32000-vocab.json",
+        "merges_file": "data/owt_train-vocab_size_32000-merges.txt",
+        "train_data": "data/owt_train.bin",
+        "val_data": "data/owt_valid.bin",
+        "raw_train": "data/owt_train.txt",
+        "raw_val": "data/owt_valid.txt"
+    },
+    "model": {
+        "vocab_size": 32000,
+        "context_length": 256,
+        "d_model": 512,
+        "num_layers": 4,
+        "num_heads": 8,
+        "d_ff": 1536,
+        "rope_theta": 10000.0
+    },
+    "training": {
+        "batch_size": 64,
+        "num_steps": 5000,
+        "learning_rate": 3e-4,
+        "min_lr_ratio": 0.1,
+        "warmup_steps": 500,
+        "weight_decay": 0.01,
+        "grad_clip": 1.0,
+        "eval_interval": 500,
+        "eval_batches": 10,
+        "optimizer": "muon",
+        "use_flash_attention": true
+    },
+    "system": {
+        "checkpoint_path": "checkpoint_muon.pt",
+        "log_path": "data/output.md",
+        "use_compile": false
+    },
+    "notes": "Testing Muon optimizer (falls back to AdamW until implemented)"
+}
