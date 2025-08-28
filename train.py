@@ -7,15 +7,19 @@ from datetime import datetime
 from tqdm import tqdm
 import argparse
 
-from cs336_basics.model import TransformerLM
-from cs336_basics.optimizer import get_optimizer
-from cs336_basics.tokenizer import BPETokenizer
-from cs336_basics.utils import (
+from core.model import TransformerLM
+from core.optimizer import get_optimizer
+
+# from core.bpe_tokenizer import BPETokenizer
+from tokenizers import Tokenizer
+from tokenizers.models import BPE
+from core.utils import (
     lr_cosine_schedule,
     cross_entropy,
     gradient_clipping,
     get_batch,
     save_checkpoint,
+    load_checkpoint,
 )
 
 
@@ -66,7 +70,8 @@ def tokenize_if_needed(text_file, bin_file, tokenizer):
     tokens = []
     with open(text_file, "r") as f:
         for line in tqdm(f):
-            tokens.extend(tokenizer.encode(line))
+            # tokens.extend(tokenizer.encode(line))
+            tokens.extend(tokenizer.encode(line).ids)
     np.array(tokens, dtype=np.uint16).tofile(bin_file)
 
 
@@ -79,8 +84,11 @@ def train():
     print(f"Using {device}")
 
     # setup tokenizer and data
-    tokenizer = BPETokenizer.from_files(
-        config["data"]["vocab_file"], config["data"]["merges_file"]
+    # tokenizer = BPETokenizer.from_files(
+    #     config["data"]["vocab_file"], config["data"]["merges_file"]
+    # )
+    tokenizer = Tokenizer(
+        BPE.from_file(config["data"]["vocab_file"], config["data"]["merges_file"])
     )
     tokenize_if_needed(
         config["data"].get("raw_train"), config["data"]["train_data"], tokenizer
@@ -105,7 +113,7 @@ def train():
         num_heads=m["num_heads"],
         d_ff=m["d_ff"],
         rope_theta=m["rope_theta"],
-        use_flash_attention=use_flash,
+        use_flash_attn=use_flash,
         device=device,
     ).to(device)
 
@@ -129,11 +137,19 @@ def train():
 
     print(f"Using {optimizer_name} optimizer")
 
+    # try to resume from checkpoint
+    start_step = 0
+    if os.path.exists(config["system"]["checkpoint_path"]):
+        print(f"Resuming from {config['system']['checkpoint_path']}")
+        start_step = load_checkpoint(config["system"]["checkpoint_path"], model, opt)
+
     best_loss = 999
     best_step = 0
     losses = []
 
-    for step in tqdm(range(t["num_steps"]), desc=config["experiment_name"][:20]):
+    for step in tqdm(
+        range(start_step, t["num_steps"]), desc=config["experiment_name"][:20]
+    ):
         # lr schedule
         lr = lr_cosine_schedule(
             step,

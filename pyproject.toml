@@ -5,17 +5,24 @@ description = "LLM From Scratch"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "einops>=0.8.1", # tensor operations
+    "einx>=0.3.0", # more general tensor operations
     "humanfriendly",
+    "jaxtyping>=0.3.0", # type hints for pytorch/jax/numpy
     "matplotlib",
     "numpy",
+    "pandas>=2",
+    "psutil>=6.1.1",
     "pytest>=8",
     "regex>=2024.11.6",
+    "submitit>=1.5.2", # job submission for SLURM
+    "tiktoken>=0.9.0",
+    "tokenizers>=0.21.0",
     "torch~=2.6.0; sys_platform != 'darwin' or platform_machine != 'x86_64'",
     "torch~=2.2.2; sys_platform == 'darwin' and platform_machine == 'x86_64'", # Intel Macs
     "tqdm>=4.67.1",
-    "wandb>=0.19.7",
-    "pandas>=2",
     "triton-windows>=3; sys_platform == 'win32'",
+    "wandb>=0.19.7",
 ]
 
 [tool.setuptools.packages.find]

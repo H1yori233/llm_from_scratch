@@ -1,0 +1,39 @@
+{
+    "experiment_name": "tinystories_standard_attention",
+    "data": {
+        "vocab_file": "data/TinyStoriesV2-GPT4-train-vocab_size_10000-vocab.json",
+        "merges_file": "data/TinyStoriesV2-GPT4-train-vocab_size_10000-merges.txt", 
+        "train_data": "data/TinyStoriesV2-GPT4-train.bin",
+        "val_data": "data/TinyStoriesV2-GPT4-valid.bin",
+        "raw_train": "data/TinyStoriesV2-GPT4-train.txt",
+        "raw_val": "data/TinyStoriesV2-GPT4-valid.txt"
+    },
+    "model": {
+        "vocab_size": 10000,
+        "context_length": 256,
+        "d_model": 512,
+        "num_layers": 4,
+        "num_heads": 8,
+        "d_ff": 1536,
+        "rope_theta": 10000.0
+    },
+    "training": {
+        "batch_size": 64,
+        "num_steps": 5000,
+        "learning_rate": 3e-4,
+        "min_lr_ratio": 0.1,
+        "warmup_steps": 500,
+        "weight_decay": 0.01,
+        "grad_clip": 1.0,
+        "eval_interval": 500,
+        "eval_batches": 10,
+        "optimizer": "adamw",
+        "use_flash_attention": false
+    },
+    "system": {
+        "checkpoint_path": "checkpoint_standard.pt",
+        "log_path": "data/output.md",
+        "use_compile": true
+    },
+    "notes": "TinyStories baseline with standard attention"
+}

@@ -5,8 +5,8 @@
         "merges_file": "data/owt_train-vocab_size_32000-merges.txt",
         "train_data": "data/owt_train.bin",
         "val_data": "data/owt_valid.bin",
-        "raw_train": "data/owt_train.txt",
-        "raw_val": "data/owt_valid.txt"
+        "raw_train": "../assignment1-basics/data/owt_train.txt",
+        "raw_val": "../assignment1-basics/data/owt_valid.txt"
     },
     "model": {
         "vocab_size": 32000,
