@@ -1,10 +1,10 @@
 {
-    "experiment_name": "tinystories_large_flash", 
+    "experiment_name": "tinystories_large_flash",
     "data": {
         "vocab_file": "data/TinyStoriesV2-GPT4-train-vocab_size_10000-vocab.json",
         "merges_file": "data/TinyStoriesV2-GPT4-train-vocab_size_10000-merges.txt",
         "train_data": "data/TinyStoriesV2-GPT4-train.bin",
-        "val_data": "data/TinyStoriesV2-GPT4-valid.bin", 
+        "val_data": "data/TinyStoriesV2-GPT4-valid.bin",
         "raw_train": "data/TinyStoriesV2-GPT4-train.txt",
         "raw_val": "data/TinyStoriesV2-GPT4-valid.txt"
     },
@@ -31,8 +31,8 @@
         "use_flash_attention": true
     },
     "system": {
-        "checkpoint_path": "checkpoint_large.pt",
-        "log_path": "data/output.md", 
+        "checkpoint_path": "data/checkpoint/tinystories_large_flash.pt",
+        "log_path": "data/output.md",
         "use_compile": true
     },
     "notes": "Larger TinyStories model (6L/8H/512D) with Flash Attention and longer context"

@@ -1,5 +1,5 @@
 {
-    "experiment_name": "muon_optimizer_test",
+    "experiment_name": "lower_lr_4L_8H_512D",
     "data": {
         "vocab_file": "data/owt_train-vocab_size_32000-vocab.json",
         "merges_file": "data/owt_train-vocab_size_32000-merges.txt",
@@ -19,21 +19,21 @@
     },
     "training": {
         "batch_size": 64,
-        "num_steps": 5000,
-        "learning_rate": 3e-4,
-        "min_lr_ratio": 0.1,
-        "warmup_steps": 500,
+        "num_steps": 7500,
+        "learning_rate": 1e-4,
+        "min_lr_ratio": 0.05,
+        "warmup_steps": 750,
         "weight_decay": 0.01,
         "grad_clip": 1.0,
         "eval_interval": 500,
         "eval_batches": 10,
-        "optimizer": "muon",
+        "optimizer": "adamw",
         "use_flash_attention": true
     },
     "system": {
-        "checkpoint_path": "checkpoint_muon.pt",
+        "checkpoint_path": "data/checkpoint/lower_lr_4L_8H_512D.pt",
         "log_path": "data/output.md",
         "use_compile": false
     },
-    "notes": "Testing Muon optimizer (falls back to AdamW until implemented)"
-}
+    "notes": "Lower learning rate with longer training for stability"
+  }

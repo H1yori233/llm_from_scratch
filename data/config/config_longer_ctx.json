@@ -1,16 +1,16 @@
 {
-    "experiment_name": "baseline_4L_8H_512D",
+    "experiment_name": "longer_context_4L_8H_512D",
     "data": {
         "vocab_file": "data/owt_train-vocab_size_32000-vocab.json",
         "merges_file": "data/owt_train-vocab_size_32000-merges.txt",
         "train_data": "data/owt_train.bin",
         "val_data": "data/owt_valid.bin",
-        "raw_train": "../assignment1-basics/data/owt_train.txt",
-        "raw_val": "../assignment1-basics/data/owt_valid.txt"
+        "raw_train": "data/owt_train.txt",
+        "raw_val": "data/owt_valid.txt"
     },
     "model": {
         "vocab_size": 32000,
-        "context_length": 256,
+        "context_length": 512,
         "d_model": 512,
         "num_layers": 4,
         "num_heads": 8,
@@ -18,11 +18,11 @@
         "rope_theta": 10000.0
     },
     "training": {
-        "batch_size": 64,
-        "num_steps": 5000,
-        "learning_rate": 3e-4,
+        "batch_size": 32,
+        "num_steps": 6000,
+        "learning_rate": 2e-4,
         "min_lr_ratio": 0.1,
-        "warmup_steps": 500,
+        "warmup_steps": 600,
         "weight_decay": 0.01,
         "grad_clip": 1.0,
         "eval_interval": 500,
@@ -31,9 +31,9 @@
         "use_flash_attention": true
     },
     "system": {
-        "checkpoint_path": "checkpoint.pt",
+        "checkpoint_path": "data/checkpoint/longer_context_4L_8H_512D.pt",
         "log_path": "data/output.md",
         "use_compile": false
     },
-    "notes": "Baseline model with standard hyperparameters"
-}
+    "notes": "Longer context length with adjusted batch size to fit memory"
+  }

@@ -4,22 +4,6 @@ import triton
 import triton.language as tl
 
 
-# Configuration options for Triton autotuning
-FLASH_ATTENTION_CONFIGS = [
-    triton.Config({'Q_TILE_SIZE': 32, 'K_TILE_SIZE': 32}, num_warps=4, num_stages=2),
-    triton.Config({'Q_TILE_SIZE': 64, 'K_TILE_SIZE': 32}, num_warps=4, num_stages=3),
-    triton.Config({'Q_TILE_SIZE': 32, 'K_TILE_SIZE': 64}, num_warps=4, num_stages=3),
-    triton.Config({'Q_TILE_SIZE': 64, 'K_TILE_SIZE': 64}, num_warps=8, num_stages=4),
-    triton.Config({'Q_TILE_SIZE': 128, 'K_TILE_SIZE': 64}, num_warps=8, num_stages=4),
-    triton.Config({'Q_TILE_SIZE': 64, 'K_TILE_SIZE': 128}, num_warps=8, num_stages=4),
-    triton.Config({'Q_TILE_SIZE': 128, 'K_TILE_SIZE': 128}, num_warps=16, num_stages=4),
-]
-
-
-@triton.autotune(
-    configs=FLASH_ATTENTION_CONFIGS,
-    key=['N_QUERIES', 'N_KEYS', 'D'],
-)
 @triton.jit
 def flash_fwd_kernel(
     Q_ptr, K_ptr, V_ptr,
@@ -141,11 +125,6 @@ def flash_fwd_kernel(
     tl.store(L_block_ptr, L_i.to(input_dtype), boundary_check=(0,))
 
 
-
-@triton.autotune(
-    configs=FLASH_ATTENTION_CONFIGS,
-    key=['N_QUERIES', 'N_KEYS', 'D'],
-)
 @triton.jit
 def flash_backward_dkv_kernel(
     Q_ptr, K_ptr, V_ptr,
@@ -288,11 +267,6 @@ def flash_backward_dkv_kernel(
     tl.store(dV_block_ptr, dV_j.to(input_dtype), boundary_check=(0,))
 
 
-
-@triton.autotune(
-    configs=FLASH_ATTENTION_CONFIGS,
-    key=['N_QUERIES', 'N_KEYS', 'D'],
-)
 @triton.jit
 def flash_backward_dq_kernel(
     Q_ptr, K_ptr, V_ptr,
@@ -449,6 +423,9 @@ class TritonFlashAttentionAutogradFunction(torch.autograd.Function):
         
         B, N_QUERIES, D = Q.shape
         _, N_KEYS, _ = K.shape
+        
+        ctx.Q_TILE_SIZE = 32  # B_r
+        ctx.K_TILE_SIZE = 32  # B_c
         ctx.is_causal = is_causal
 
         # initialize O, L
@@ -458,7 +435,7 @@ class TritonFlashAttentionAutogradFunction(torch.autograd.Function):
         scale = 1.0 / math.sqrt(D)
         
         # launch kernel
-        grid = lambda meta: (triton.cdiv(N_QUERIES, meta['Q_TILE_SIZE']), B)
+        grid = (triton.cdiv(N_QUERIES, ctx.Q_TILE_SIZE), B)
         flash_fwd_kernel[grid](
             Q, K, V,
             O, L,
@@ -470,6 +447,8 @@ class TritonFlashAttentionAutogradFunction(torch.autograd.Function):
             N_QUERIES, N_KEYS,
             scale,
             D=D,
+            Q_TILE_SIZE=ctx.Q_TILE_SIZE,
+            K_TILE_SIZE=ctx.K_TILE_SIZE,
             is_causal=ctx.is_causal
         )
         
@@ -505,7 +484,7 @@ class TritonFlashAttentionAutogradFunction(torch.autograd.Function):
         dO = grad_output
         
         # launch kernel
-        grid_dkv = lambda meta: (triton.cdiv(N_KEYS, meta['K_TILE_SIZE']), B)
+        grid_dkv = (triton.cdiv(N_KEYS, ctx.K_TILE_SIZE), B)
         flash_backward_dkv_kernel[grid_dkv](
             Q, K, V,
             L, D_,
@@ -519,9 +498,11 @@ class TritonFlashAttentionAutogradFunction(torch.autograd.Function):
             N_QUERIES, N_KEYS,
             scale,
             D=D,
+            Q_TILE_SIZE=ctx.Q_TILE_SIZE,
+            K_TILE_SIZE=ctx.K_TILE_SIZE,
             is_causal=ctx.is_causal
         )
-        grid_dq = lambda meta: (triton.cdiv(N_QUERIES, meta['Q_TILE_SIZE']), B)
+        grid_dq = (triton.cdiv(N_QUERIES, ctx.Q_TILE_SIZE), B)
         flash_backward_dq_kernel[grid_dq](
             Q, K, V,
             L, D_,
@@ -535,6 +516,8 @@ class TritonFlashAttentionAutogradFunction(torch.autograd.Function):
             N_QUERIES, N_KEYS,
             scale,
             D=D,
+            Q_TILE_SIZE=ctx.Q_TILE_SIZE,
+            K_TILE_SIZE=ctx.K_TILE_SIZE,
             is_causal=ctx.is_causal
         )
         

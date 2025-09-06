@@ -1,12 +1,12 @@
 {
-    "experiment_name": "tinystories_flash_attention",
+    "experiment_name": "tinystories_standard_attention",
     "data": {
         "vocab_file": "data/TinyStoriesV2-GPT4-train-vocab_size_10000-vocab.json",
         "merges_file": "data/TinyStoriesV2-GPT4-train-vocab_size_10000-merges.txt",
-        "train_data": "data/TinyStoriesV2-GPT4-train.bin", 
+        "train_data": "data/TinyStoriesV2-GPT4-train.bin",
         "val_data": "data/TinyStoriesV2-GPT4-valid.bin",
-        "raw_train": "../assignment1-basics/data/TinyStoriesV2-GPT4-train.txt",
-        "raw_val": "../assignment1-basics/data/TinyStoriesV2-GPT4-valid.txt"
+        "raw_train": "data/TinyStoriesV2-GPT4-train.txt",
+        "raw_val": "data/TinyStoriesV2-GPT4-valid.txt"
     },
     "model": {
         "vocab_size": 10000,
@@ -28,12 +28,12 @@
         "eval_interval": 500,
         "eval_batches": 10,
         "optimizer": "adamw",
-        "use_flash_attention": true
+        "use_flash_attention": false
     },
     "system": {
-        "checkpoint_path": "checkpoint_flash.pt",
+        "checkpoint_path": "data/checkpoint/tinystories_standard_attention.pt",
         "log_path": "data/output.md",
         "use_compile": true
     },
-    "notes": "TinyStories with Flash Attention"
+    "notes": "TinyStories baseline with standard attention"
 }
